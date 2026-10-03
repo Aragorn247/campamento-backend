@@ -1,11 +1,11 @@
 # 🏕️ Campamento Management API
 
-![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)
+![Python 3.13](https://img.shields.io/badge/Python-3.13-blue.svg)
 ![Flask 3.0](https://img.shields.io/badge/Flask-3.0-green.svg)
 ![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-blue.svg)
 ![Docker Ready](https://img.shields.io/badge/Docker-Containerized-2496ED.svg)
 
-API RESTful modular para la gestión integral de un campamento (usuarios, actividades y reservas), construida con **Flask**, **PostgreSQL** y **Docker Compose**, utilizando autenticación sin estado mediante **JWT**.
+API RESTful modular para la gestión integral de un campamento (usuarios, actividades y reservas), construida con **Flask**, **PostgreSQL** y **Docker Compose**, utilizando autenticación sin estado mediante **JWT** y gestión del esquema mediante **Flask-Migrate (Alembic)**.
 
 ---
 
@@ -14,6 +14,7 @@ API RESTful modular para la gestión integral de un campamento (usuarios, activi
 * **Application Factory Pattern:** Separación limpia de configuraciones, extensiones y registros de rutas.
 * **Modular Blueprints:** Rutas divididas en módulos independientes (`auth`, `activities`, `bookings`).
 * **JWT & RBAC:** Control de acceso basado en roles (`admin` / `user`) con `Flask-JWT-Extended`.
+* **Database Versioning:** Control de cambios y migraciones en PostgreSQL mediante `Flask-Migrate` y `Alembic`.
 * **Containerized Environment:** Entorno de desarrollo multi-contenedor aislado con Docker Compose.
 * **OpenAPI Documentation:** Documentación interactiva de endpoints integrada vía Swagger (`Flasgger`).
 
