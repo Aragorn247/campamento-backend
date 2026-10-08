@@ -19,4 +19,5 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["python", "run.py"]
+# Comando de producción con Gunicorn (3 workers paralelos)
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "3", "app:create_app()"]
