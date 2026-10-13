@@ -145,24 +145,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 6. Petición protegida POST para reservar una actividad
+    // 6. Petición protegida POST para reservar una actividad (endpoint correcto en /api/v1/bookings)
     async function bookActivity(activityId) {
         const token = localStorage.getItem('jwt_token');
 
         try {
-            const response = await fetch(`http://127.0.0.1:5000/api/v1/activities/${activityId}/book`, {
+            const response = await fetch('http://127.0.0.1:5000/api/v1/bookings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                }
+                },
+                body: JSON.stringify({
+                    activity_id: parseInt(activityId)
+                })
             });
 
             const data = await response.json();
 
             if (response.ok) {
                 alert('¡Reserva realizada con éxito!');
-                loadActivities(); // Recargar el listado para reflejar cambios en plazas si aplica
+                loadActivities(); // Recargar listado para actualizar datos
             } else {
                 alert(data.message || data.msg || 'No se pudo completar la reserva.');
             }
