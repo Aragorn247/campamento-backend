@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showDashboard();
     }
 
-    // 2. Manejador del formulario de Login (mantiene tu lógica exacta)
+    // 2. Manejador del formulario de Login
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -39,8 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 messageDiv.className = 'success';
                 messageDiv.textContent = '¡Login exitoso! Token guardado.';
-                
-                console.log('Token JWT guardado:', data.access_token);
 
                 // Transición fluida al panel de actividades
                 setTimeout(() => {
@@ -101,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 container.innerHTML = '<p class="error">Error al cargar las actividades del campamento.</p>';
                 if (response.status === 401) {
-                    // Token expirado o inválido: forzar re-login
                     localStorage.removeItem('jwt_token');
                     dashboardSection.classList.add('hidden');
                     loginSection.classList.remove('hidden');
@@ -113,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 5. Renderizado dinámico de las tarjetas de actividades
+    // 5. Renderizado dinámico de las tarjetas de actividades con botón de reserva
     function renderActivities(activities) {
         const container = document.getElementById('activities-list');
         container.innerHTML = '';
@@ -126,12 +123,52 @@ document.addEventListener('DOMContentLoaded', () => {
         activities.forEach(activity => {
             const card = document.createElement('div');
             card.className = 'activity-card';
+            
+            // Usamos un ID seguro (compatible con id o _id según devuelva la API)
+            const activityId = activity.id || activity._id;
+
             card.innerHTML = `
                 <h4 style="margin: 0 0 5px 0; color: #333;">${activity.name || activity.title || 'Actividad'}</h4>
                 <p style="margin: 0 0 5px 0; font-size: 14px; color: #555;">${activity.description || 'Sin descripción'}</p>
-                <p style="margin: 0; font-size: 13px; color: #777;"><strong>Plazas:</strong> ${activity.capacity ?? 'N/D'}</p>
+                <p style="margin: 0 0 10px 0; font-size: 13px; color: #777;"><strong>Plazas:</strong> ${activity.capacity ?? 'N/D'}</p>
+                <button type="button" class="btn-book" data-id="${activityId}" style="padding: 6px 12px; font-size: 14px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Reservar Plaza</button>
             `;
             container.appendChild(card);
         });
+
+        // Adjuntar eventos a los botones de reserva generados
+        document.querySelectorAll('.btn-book').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const activityId = e.target.getAttribute('data-id');
+                await bookActivity(activityId);
+            });
+        });
+    }
+
+    // 6. Petición protegida POST para reservar una actividad
+    async function bookActivity(activityId) {
+        const token = localStorage.getItem('jwt_token');
+
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/api/v1/activities/${activityId}/book`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert('¡Reserva realizada con éxito!');
+                loadActivities(); // Recargar el listado para reflejar cambios en plazas si aplica
+            } else {
+                alert(data.message || data.msg || 'No se pudo completar la reserva.');
+            }
+        } catch (error) {
+            console.error('Error al reservar:', error);
+            alert('Error de conexión al intentar reservar la actividad.');
+        }
     }
 });
