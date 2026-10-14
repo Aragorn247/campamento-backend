@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageDiv.className = 'success';
                 messageDiv.textContent = '¡Login exitoso! Token guardado.';
 
-                // Transición fluida al panel de actividades
                 setTimeout(() => {
                     showDashboard();
                 }, 800);
@@ -73,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dashboardSection.classList.remove('hidden');
         }
         await loadActivities();
+        await loadMyBookings();
     }
 
     // 4. Petición protegida GET para obtener el listado de actividades
@@ -99,9 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 container.innerHTML = '<p class="error">Error al cargar las actividades del campamento.</p>';
                 if (response.status === 401) {
-                    localStorage.removeItem('jwt_token');
-                    dashboardSection.classList.add('hidden');
-                    loginSection.classList.remove('hidden');
+                    handleUnauthorized();
                 }
             }
         } catch (error) {
@@ -123,8 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
         activities.forEach(activity => {
             const card = document.createElement('div');
             card.className = 'activity-card';
-            
-            // Usamos un ID seguro (compatible con id o _id según devuelva la API)
             const activityId = activity.id || activity._id;
 
             card.innerHTML = `
@@ -136,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
             container.appendChild(card);
         });
 
-        // Adjuntar eventos a los botones de reserva generados
         document.querySelectorAll('.btn-book').forEach(button => {
             button.addEventListener('click', async (e) => {
                 const activityId = e.target.getAttribute('data-id');
@@ -145,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 6. Petición protegida POST para reservar una actividad (endpoint correcto en /api/v1/bookings)
+    // 6. Petición protegida POST para reservar una actividad
     async function bookActivity(activityId) {
         const token = localStorage.getItem('jwt_token');
 
@@ -165,7 +160,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 alert('¡Reserva realizada con éxito!');
-                loadActivities(); // Recargar listado para actualizar datos
+                loadActivities();
+                loadMyBookings(); // Actualizar también la sección de mis reservas
             } else {
                 alert(data.message || data.msg || 'No se pudo completar la reserva.');
             }
@@ -173,5 +169,72 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error al reservar:', error);
             alert('Error de conexión al intentar reservar la actividad.');
         }
+    }
+
+    // 7. Petición protegida GET para obtener las reservas del usuario
+    async function loadMyBookings() {
+        const token = localStorage.getItem('jwt_token');
+        const container = document.getElementById('my-bookings-list');
+
+        if (!container) return;
+        container.innerHTML = '<p>Cargando tus reservas...</p>';
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/v1/bookings/my-bookings', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                renderMyBookings(data);
+            } else {
+                container.innerHTML = '<p class="error">Error al cargar tus reservas.</p>';
+                if (response.status === 401) {
+                    handleUnauthorized();
+                }
+            }
+        } catch (error) {
+            console.error('Error de red:', error);
+            container.innerHTML = '<p class="error">No se pudo conectar con el servidor de reservas.</p>';
+        }
+    }
+
+    // 8. Renderizado dinámico de las reservas del usuario
+    function renderMyBookings(bookings) {
+        const container = document.getElementById('my-bookings-list');
+        container.innerHTML = '';
+
+        if (!bookings || bookings.length === 0) {
+            container.innerHTML = '<p style="font-size: 14px; color: #666;">No tienes reservas activas actualmente.</p>';
+            return;
+        }
+
+        bookings.forEach(booking => {
+            const card = document.createElement('div');
+            card.className = 'activity-card';
+            card.style.backgroundColor = '#eef9ff';
+            
+            // Dependiendo de cómo devuelva el backend la reserva (puede incluir el objeto activity o solo IDs)
+            const activityName = booking.activity_name || booking.activity?.name || `Actividad #${booking.activity_id}`;
+            const bookingDate = booking.created_at ? new Date(booking.created_at).toLocaleDateString() : '';
+
+            card.innerHTML = `
+                <h4 style="margin: 0 0 5px 0; color: #0056b3;">${activityName}</h4>
+                <p style="margin: 0; font-size: 13px; color: #555;">${bookingDate ? `Reservado el: ${bookingDate}` : 'Reserva confirmada'}</p>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Función auxiliar para manejar tokens no válidos o expirados
+    function handleUnauthorized() {
+        localStorage.removeItem('jwt_token');
+        dashboardSection.classList.add('hidden');
+        loginSection.classList.remove('hidden');
     }
 });

@@ -26,13 +26,20 @@
             <div id="message"></div>
         </div>
 
-        <!-- SECCIÓN 2: PANEL DE ACTIVIDADES (Se muestra tras hacer login) -->
+        <!-- SECCIÓN 2: PANEL DE ACTIVIDADES Y RESERVAS -->
         <div id="dashboard-section" class="hidden">
             <h2>Panel de Actividades</h2>
             <p style="color: #666;">Listado de actividades disponibles en el campamento:</p>
             
             <div id="activities-list" class="activities-grid">
                 <!-- Se cargan dinámicamente desde la API -->
+            </div>
+
+            <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;">
+
+            <h2>Mis Reservas</h2>
+            <div id="my-bookings-list" class="activities-grid">
+                <!-- Se cargan dinámicamente las reservas del usuario -->
             </div>
 
             <button type="button" id="logoutBtn" class="btn-danger">Cerrar Sesión</button>
