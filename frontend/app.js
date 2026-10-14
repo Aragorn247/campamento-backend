@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const logoutBtn = document.getElementById('logoutBtn');
     const messageDiv = document.getElementById('message');
+    const createActivityForm = document.getElementById('createActivityForm');
+    const adminMessage = document.getElementById('admin-message');
 
     // 1. Validar si ya existe una sesión activa al cargar la página
     if (localStorage.getItem('jwt_token')) {
@@ -62,6 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
             loginSection.classList.remove('hidden');
             loginForm.reset();
             messageDiv.textContent = '';
+            if (createActivityForm) createActivityForm.reset();
+            if (adminMessage) adminMessage.textContent = '';
         });
     }
 
@@ -161,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 alert('¡Reserva realizada con éxito!');
                 loadActivities();
-                loadMyBookings(); // Actualizar también la sección de mis reservas
+                loadMyBookings();
             } else {
                 alert(data.message || data.msg || 'No se pudo completar la reserva.');
             }
@@ -219,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
             card.className = 'activity-card';
             card.style.backgroundColor = '#eef9ff';
             
-            // Dependiendo de cómo devuelva el backend la reserva (puede incluir el objeto activity o solo IDs)
             const activityName = booking.activity_name || booking.activity?.name || `Actividad #${booking.activity_id}`;
             const bookingDate = booking.created_at ? new Date(booking.created_at).toLocaleDateString() : '';
 
@@ -228,6 +231,57 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p style="margin: 0; font-size: 13px; color: #555;">${bookingDate ? `Reservado el: ${bookingDate}` : 'Reserva confirmada'}</p>
             `;
             container.appendChild(card);
+        });
+    }
+
+    // 9. Manejador para la creación de nuevas actividades (Admin)
+    if (createActivityForm) {
+        createActivityForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('jwt_token');
+
+            const name = document.getElementById('actName').value;
+            const description = document.getElementById('actDesc').value;
+            const capacity = parseInt(document.getElementById('actCapacity').value);
+            const price = parseFloat(document.getElementById('actPrice').value);
+
+            adminMessage.className = '';
+            adminMessage.textContent = 'Creando actividad...';
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/v1/activities', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description,
+                        capacity,
+                        price
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    adminMessage.className = 'success';
+                    adminMessage.style.color = 'green';
+                    adminMessage.textContent = '¡Actividad creada exitosamente!';
+                    createActivityForm.reset();
+                    loadActivities(); // Recargar el listado general
+                } else {
+                    adminMessage.className = 'error';
+                    adminMessage.style.color = 'red';
+                    adminMessage.textContent = data.message || data.msg || 'No se pudo crear la actividad.';
+                }
+            } catch (error) {
+                console.error('Error al crear actividad:', error);
+                adminMessage.className = 'error';
+                adminMessage.style.color = 'red';
+                adminMessage.textContent = 'Error de conexión con el servidor.';
+            }
         });
     }
 
