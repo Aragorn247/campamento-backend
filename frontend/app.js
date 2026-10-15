@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 5. Renderizado dinámico de las tarjetas de actividades con botón de reserva
+    // 5. Renderizado dinámico de las tarjetas de actividades con botón de reserva y badge de plazas
     function renderActivities(activities) {
         const container = document.getElementById('activities-list');
         container.innerHTML = '';
@@ -128,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const activityId = activity.id || activity._id;
 
             card.innerHTML = `
-                <h4 style="margin: 0 0 5px 0; color: #333;">${activity.name || activity.title || 'Actividad'}</h4>
-                <p style="margin: 0 0 5px 0; font-size: 14px; color: #555;">${activity.description || 'Sin descripción'}</p>
-                <p style="margin: 0 0 10px 0; font-size: 13px; color: #777;"><strong>Plazas:</strong> ${activity.capacity ?? 'N/D'}</p>
-                <button type="button" class="btn-book" data-id="${activityId}" style="padding: 6px 12px; font-size: 14px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Reservar Plaza</button>
+                <h4>${activity.name || activity.title || 'Actividad'}</h4>
+                <p>${activity.description || 'Sin descripción'}</p>
+                <div class="badge-stock">${activity.capacity ?? 0} Plazas disponibles</div>
+                <button type="button" class="btn-book" data-id="${activityId}">Reservar Plaza</button>
             `;
             container.appendChild(card);
         });
@@ -214,21 +214,20 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = '';
 
         if (!bookings || bookings.length === 0) {
-            container.innerHTML = '<p style="font-size: 14px; color: #666;">No tienes reservas activas actualmente.</p>';
+            container.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary);">No tienes reservas activas actualmente.</p>';
             return;
         }
 
         bookings.forEach(booking => {
             const card = document.createElement('div');
             card.className = 'activity-card';
-            card.style.backgroundColor = '#eef9ff';
             
             const activityName = booking.activity_name || booking.activity?.name || `Actividad #${booking.activity_id}`;
             const bookingDate = booking.created_at ? new Date(booking.created_at).toLocaleDateString() : '';
 
             card.innerHTML = `
-                <h4 style="margin: 0 0 5px 0; color: #0056b3;">${activityName}</h4>
-                <p style="margin: 0; font-size: 13px; color: #555;">${bookingDate ? `Reservado el: ${bookingDate}` : 'Reserva confirmada'}</p>
+                <h4 style="margin: 0 0 5px 0; color: var(--text-primary);">${activityName}</h4>
+                <p style="margin: 0; font-size: 13px; color: var(--text-secondary);">${bookingDate ? `Reservado el: ${bookingDate}` : 'Reserva confirmada'}</p>
             `;
             container.appendChild(card);
         });
@@ -267,19 +266,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (response.ok) {
                     adminMessage.className = 'success';
-                    adminMessage.style.color = 'green';
                     adminMessage.textContent = '¡Actividad creada exitosamente!';
                     createActivityForm.reset();
-                    loadActivities(); // Recargar el listado general
+                    loadActivities();
                 } else {
                     adminMessage.className = 'error';
-                    adminMessage.style.color = 'red';
                     adminMessage.textContent = data.message || data.msg || 'No se pudo crear la actividad.';
                 }
             } catch (error) {
                 console.error('Error al crear actividad:', error);
                 adminMessage.className = 'error';
-                adminMessage.style.color = 'red';
                 adminMessage.textContent = 'Error de conexión con el servidor.';
             }
         });
