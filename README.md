@@ -11,12 +11,12 @@ API RESTful modular para la gestión integral de un campamento (usuarios, activi
 
 ## 🏗️ Arquitectura y Patrones
 
-* **Application Factory Pattern:** Separación limpia de configuraciones, extensiones y registros de rutas.
-* **Modular Blueprints:** Rutas divididas en módulos independientes (`auth`, `activities`, `bookings`).
-* **JWT & RBAC:** Control de acceso basado en roles (`admin` / `user`) con `Flask-JWT-Extended`.
-* **Database Versioning:** Control de cambios y migraciones en PostgreSQL mediante `Flask-Migrate` y `Alembic`.
-* **Containerized Environment:** Entorno de desarrollo multi-contenedor aislado con Docker Compose.
-* **OpenAPI Documentation:** Documentación interactiva de endpoints integrada vía Swagger (`Flasgger`).
+- **Application Factory Pattern:** Separación limpia de configuraciones, extensiones y registros de rutas.
+- **Modular Blueprints:** Rutas divididas en módulos independientes (`auth`, `activities`, `bookings`).
+- **JWT & RBAC:** Control de acceso basado en roles (`admin` / `user`) con `Flask-JWT-Extended`.
+- **Database Versioning:** Control de cambios y migraciones en PostgreSQL mediante `Flask-Migrate` y `Alembic`.
+- **Containerized Environment:** Entorno de desarrollo multi-contenedor aislado con Docker Compose.
+- **OpenAPI Documentation:** Documentación interactiva de endpoints integrada vía Swagger (`Flasgger`).
 
 ---
 
@@ -34,8 +34,18 @@ API RESTful modular para la gestión integral de un campamento (usuarios, activi
 
 ---
 
-## 🛠️ Despliegue Local con Docker
+## 🎨 Interfaz de Usuario y Experiencia (Frontend)
 
+El sistema incluye una interfaz web integrada de alto rendimiento orientada a la experiencia de usuario:
+* **Modo Oscuro Corporativo (Dark Mode):** Interfaz optimizada con paleta *Slate/Sky* y diseño sobrio tipo SaaS profesional.
+* **Control de Stock en Vivo:** Insignias (*badges*) dinámicas que reflejan las plazas disponibles en tiempo real para cada actividad.
+* **Gestión de Sesiones Seguras:** Almacenamiento eficiente de tokens JWT en el cliente con limpieza automática e inmediata al cerrar sesión.
+
+---
+
+## 🛠️ Instalación y Despliegue Local
+
+### Opción A: Despliegue con Docker Compose (Recomendado)
 1. Clonar el repositorio:
    ```bash
    git clone [https://github.com/Aragorn247/campamento-backend.git](https://github.com/Aragorn247/campamento-backend.git)
